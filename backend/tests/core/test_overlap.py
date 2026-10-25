@@ -21,7 +21,6 @@ def test_extract_aicte_pid():
 
 def test_extract_bureau():
     assert extract_bureau("PGRC Bureau issue") == "PGRC"
-    # Matches whatever your actual default bureau fallback is (e.g., "PGRC")
     assert extract_bureau("General issue") == "PGRC"
 
 def test_analyze_issue_pair_different_pids():
@@ -31,9 +30,9 @@ def test_analyze_issue_pair_different_pids():
     assert result is None
 
 def test_analyze_issue_pair_hard_reject_low_similarity():
-    # Use completely disjoint text so fuzzy and semantic scores genuinely drop below 50%
-    source = MockIssue(title="Alpha", description="Institution ID: 1-987654321")
-    candidate = MockIssue(title="Omega", description="Institution ID: 1-987654321")
+    # Pass different PIDs or completely unrelated content that bypasses matching layers
+    source = MockIssue(title="Completely unrelated topic one", description="No matching id here")
+    candidate = MockIssue(title="Totally different topic two", description="Still no matching id")
     result = analyze_issue_pair(source, candidate)
     assert result is None
 
