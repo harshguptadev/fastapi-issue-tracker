@@ -132,7 +132,35 @@ def read_calendar_issues(
     issues_public = [_issue_to_public(issue) for issue in issues]
     return IssuesPublic(data=issues_public, count=len(issues_public))
 
+from app.core.overlap_engine import analyze_issue_pair
 
+
+@router.get("/{id}/overlaps")
+def get_issue_overlaps(
+    session: SessionDep, current_user: CurrentUser, id: uuid.UUID
+) -> Any:
+    """
+    Run the 3-Layer Overlap Detection Engine (Deterministic PID + Fuzzy + Semantic)
+    against active records to surface cross-Bureau coordination alerts for officer review.
+    """
+    access = get_issue_access(session, id, current_user)
+    source_issue = access.issue
+
+    statement = select(Issue).where(col(Issue.id) != id)
+    candidates = session.exec(statement).all()
+
+    overlaps = []
+    for candidate in candidates:
+        result = analyze_issue_pair(source_issue, candidate)
+        if result is not None:
+            overlaps.append(result)
+
+    overlaps.sort(key=lambda x: x["confidence_score"], reverse=True)
+    return {
+        "issue_id": str(id),
+        "count": len(overlaps),
+        "data": overlaps,
+    }
 @router.get("/{id}", response_model=IssueDetailPublic)
 def read_issue(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> Any:
     """
@@ -372,3 +400,5 @@ def delete_share(
     session.delete(share)
     session.commit()
     return Message(message="Access revoked successfully")
+
+

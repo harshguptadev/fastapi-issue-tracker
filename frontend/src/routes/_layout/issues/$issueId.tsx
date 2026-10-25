@@ -15,6 +15,7 @@ import {
   STATUS_BADGE_VARIANT,
 } from "@/components/Issues/issueDisplay"
 import ShareIssueDialog from "@/components/Issues/ShareIssueDialog"
+import OverlapAlerts from "@/components/Issues/OverlapAlerts"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -225,6 +226,9 @@ function IssueDetailContent({ issueId }: { issueId: string }) {
         </div>
       </div>
 
+      {/* 3-Layer Overlap Detection Alert Panel */}
+      <OverlapAlerts issueId={issueId} />
+      
       <CommentSection issueId={issueId} />
     </div>
   )
